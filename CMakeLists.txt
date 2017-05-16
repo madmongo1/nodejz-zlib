@@ -24,6 +24,10 @@ set(zlib_interface_files ${zlib_include_dir}/zlib.h ${zlib_include_dir}/zconf.h)
 
 add_library(zlib src/dummy.cpp)
 
+if(UNIX AND NOT APPLE)
+    target_link_libraries(zlib INTERFACE "/usr/lib64/libz.so.${ZLIB_VERSION_MAJOR}")
+endif()
+
 if(UNIX)
     # On unix-like platforms the library is almost always called libz
     set_target_properties(zlib PROPERTIES OUTPUT_NAME z)
