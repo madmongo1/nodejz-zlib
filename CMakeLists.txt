@@ -97,3 +97,5 @@ install(
         NAMESPACE "${namespace}"
         DESTINATION "${config_install_dir}"
 )
+
+install(FILES ${zlib_interface_files} DESTINATION "${INSTALL_INC_DIR}")
