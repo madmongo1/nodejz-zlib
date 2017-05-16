@@ -49,28 +49,36 @@ include(CMakePackageConfigHelpers)
 
 # Configure '<PROJECT-NAME>ConfigVersion.cmake'
 # Note: PROJECT_VERSION is used as a VERSION
-write_basic_package_version_file(
-        "${version_config}" COMPATIBILITY SameMajorVersion
-)
+#write_basic_package_version_file(
+#        "${version_config}" COMPATIBILITY SameMajorVersion
+#)
 
 # Configure '<PROJECT-NAME>Config.cmake'
 # Use variables:
 #   * targets_export_name
 #   * PROJECT_NAME
-configure_package_config_file(
-        "cmake/Config.cmake.in"
-        "${project_config}"
-        INSTALL_DESTINATION "${config_install_dir}"
-)
+#configure_package_config_file(
+#        "cmake/Config.cmake.in"
+#        "${project_config}"
+#        INSTALL_DESTINATION "${config_install_dir}"
+#)
 
 # Targets:
 #   * <prefix>/lib/libbar.a
 #   * <prefix>/lib/libbaz.a
 #   * header location after install: <prefix>/include/foo/Bar.hpp
 #   * headers can be included by C++ code `#include <foo/Bar.hpp>`
+#install(
+#        TARGETS z
+#        EXPORT "${targets_export_name}"
+#        LIBRARY DESTINATION "lib"
+#        ARCHIVE DESTINATION "lib"
+#        RUNTIME DESTINATION "bin"
+#        INCLUDES DESTINATION "${include_install_dir}"
+#)
+
 install(
         TARGETS z
-        EXPORT "${targets_export_name}"
         LIBRARY DESTINATION "lib"
         ARCHIVE DESTINATION "lib"
         RUNTIME DESTINATION "bin"
@@ -97,15 +105,15 @@ install(
 # Config
 #   * <prefix>/lib/cmake/Foo/FooConfig.cmake
 #   * <prefix>/lib/cmake/Foo/FooConfigVersion.cmake
-install(
-        FILES "${project_config}" "${version_config}"
-        DESTINATION "${config_install_dir}"
-)
+#install(
+#        FILES "${project_config}" "${version_config}"
+#        DESTINATION "${config_install_dir}"
+#)
 
 # Config
 #   * <prefix>/lib/cmake/Foo/FooTargets.cmake
-install(
-        EXPORT "${targets_export_name}"
-        NAMESPACE "${namespace}"
-        DESTINATION "${config_install_dir}"
-)
+#install(
+#        EXPORT "${targets_export_name}"
+#        NAMESPACE "${namespace}"
+#        DESTINATION "${config_install_dir}"
+#)
