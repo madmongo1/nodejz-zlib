@@ -22,7 +22,18 @@ set(INSTALL_PKGCONFIG_DIR "${CMAKE_INSTALL_PREFIX}/share/pkgconfig" CACHE PATH "
 
 set(zlib_interface_files ${zlib_include_dir}/zlib.h ${zlib_include_dir}/zconf.h)
 
-add_library(z src/dummy.cpp)
+add_library(zlib src/dummy.cpp)
+
+if(UNIX)
+    # On unix-like platforms the library is almost always called libz
+    set_target_properties(zlib PROPERTIES OUTPUT_NAME z)
+    if(NOT APPLE)
+        set_target_properties(zlib PROPERTIES LINK_FLAGS "-Wl,--version-script,\"${CMAKE_CURRENT_SOURCE_DIR}/zlib.map\"")
+    endif()
+elseif(BUILD_SHARED_LIBS AND WIN32)
+    # Creates zlib1.dll when building shared library version
+    set_target_properties(zlib PROPERTIES SUFFIX "1.dll")
+endif()
 
 include(CMakePackageConfigHelpers)
 
@@ -44,76 +55,45 @@ set(project_config "${generated_dir}/${PROJECT_NAME}Config.cmake")
 set(targets_export_name "${PROJECT_NAME}Targets")
 set(namespace "${PROJECT_NAME}::")
 
-# Include module with fuction 'write_basic_package_version_file'
+####
+# Installation (https://github.com/forexample/package-example)
+
+set(config_install_dir "lib/cmake/${PROJECT_NAME}")
+set(include_install_dir "include")
+
+set(generated_dir "${CMAKE_CURRENT_BINARY_DIR}/generated")
+
+set(version_config "${generated_dir}/${PROJECT_NAME}ConfigVersion.cmake")
+set(project_config "${generated_dir}/${PROJECT_NAME}Config.cmake")
+set(targets_export_name "${PROJECT_NAME}Targets")
+set(namespace "${PROJECT_NAME}::")
+
 include(CMakePackageConfigHelpers)
 
-# Configure '<PROJECT-NAME>ConfigVersion.cmake'
 # Note: PROJECT_VERSION is used as a VERSION
-#write_basic_package_version_file(
-#        "${version_config}" COMPATIBILITY SameMajorVersion
-#)
+write_basic_package_version_file(
+        "${version_config}" COMPATIBILITY SameMajorVersion
+)
 
-# Configure '<PROJECT-NAME>Config.cmake'
-# Use variables:
-#   * targets_export_name
-#   * PROJECT_NAME
-#configure_package_config_file(
-#        "cmake/Config.cmake.in"
-#        "${project_config}"
-#        INSTALL_DESTINATION "${config_install_dir}"
-#)
-
-# Targets:
-#   * <prefix>/lib/libbar.a
-#   * <prefix>/lib/libbaz.a
-#   * header location after install: <prefix>/include/foo/Bar.hpp
-#   * headers can be included by C++ code `#include <foo/Bar.hpp>`
-#install(
-#        TARGETS z
-#        EXPORT "${targets_export_name}"
-#        LIBRARY DESTINATION "lib"
-#        ARCHIVE DESTINATION "lib"
-#        RUNTIME DESTINATION "bin"
-#        INCLUDES DESTINATION "${include_install_dir}"
-#)
+# Note: variable 'targets_export_name' used
+configure_file("cmake/Config.cmake.in" "${project_config}" @ONLY)
 
 install(
-        TARGETS z
+        TARGETS zlib
+        EXPORT "${targets_export_name}"
         LIBRARY DESTINATION "lib"
         ARCHIVE DESTINATION "lib"
         RUNTIME DESTINATION "bin"
         INCLUDES DESTINATION "${include_install_dir}"
 )
 
-# Headers:
-#   * Source/foo/Bar.hpp -> <prefix>/include/foo/Bar.hpp
-#   * Source/foo/Baz.hpp -> <prefix>/include/foo/Baz.hpp
-#install(
-#        DIRECTORY "Source/foo"
-#        DESTINATION "${include_install_dir}"
-#        FILES_MATCHING PATTERN "*.hpp"
-#)
-
-# Export headers:
-#   * ${CMAKE_CURRENT_BINARY_DIR}/bar_export.h -> <prefix>/include/bar_export.h
-#   * ${CMAKE_CURRENT_BINARY_DIR}/baz_export.h -> <prefix>/include/baz_export.h
 install(
-        FILES ${zlib_interface_files}
-        DESTINATION "${include_install_dir}"
+        FILES "${project_config}" "${version_config}"
+        DESTINATION "${config_install_dir}"
 )
 
-# Config
-#   * <prefix>/lib/cmake/Foo/FooConfig.cmake
-#   * <prefix>/lib/cmake/Foo/FooConfigVersion.cmake
-#install(
-#        FILES "${project_config}" "${version_config}"
-#        DESTINATION "${config_install_dir}"
-#)
-
-# Config
-#   * <prefix>/lib/cmake/Foo/FooTargets.cmake
-#install(
-#        EXPORT "${targets_export_name}"
-#        NAMESPACE "${namespace}"
-#        DESTINATION "${config_install_dir}"
-#)
+install(
+        EXPORT "${targets_export_name}"
+        NAMESPACE "${namespace}"
+        DESTINATION "${config_install_dir}"
+)
